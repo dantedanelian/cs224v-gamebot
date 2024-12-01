@@ -21,10 +21,22 @@ public class LLMManager : MonoBehaviour
 
     public async void AskChatGPT(string newText)
     {
-        PrintState();
+        string gameState = GetGameState();
+        string messageWithState = $"{newText}\n\nCurrent Game State:\n{gameState}";
+
         ChatMessage newMessage = new ChatMessage();
-        newMessage.Content = newText;
+        newMessage.Content = messageWithState;
         newMessage.Role = "user";
+
+        messages.Add(newMessage);
+
+        newMessage.Content = "Succinctly answer the user query using the ingested game state in a human-readable format. Do not output raw coordinates or anything that would not be helpful to the user directly, since there is a limited character count. Also do not give away solutions. If an NPC is not in frame, do not reveal its location directly.";
+        newMessage.Role = "system";
+
+        messages.Add(newMessage);
+
+        newMessage.Content = "If the user query is vague, do not volunteer information. Instead, ask leading questions about what the user is asking. Still be friendly and acknowledge the response.";
+        newMessage.Role = "system";
 
         messages.Add(newMessage);
 
@@ -36,11 +48,23 @@ public class LLMManager : MonoBehaviour
 
         if (response.Choices != null && response.Choices.Count > 0)
         {
-            var chatResponse =  response.Choices[0].Message;
+            var chatResponse = response.Choices[0].Message;
             messages.Add(chatResponse);
 
             onReponse.Invoke(chatResponse.Content);
         }
+    }
+
+    private string GetGameState()
+    {
+        string state = "Player coordinates: (" + character.transform.position.x + ", " + character.transform.position.y + ")\n";
+        int i = 0;
+        foreach (GameObject npc in npcs)
+        {
+            i++;
+            state += "NPC " + i + " coordinates: (" + npc.transform.position.x + ", " + npc.transform.position.y + ")\n";
+        }
+        return state;
     }
 
     public void PrintState()
