@@ -10,6 +10,7 @@ namespace RPGM.Gameplay
     public class NPCController : MonoBehaviour
     {
         public ConversationScript[] conversations;
+        public bool hasInteracted = false;
 
         Quest activeQuest = null;
 
@@ -24,6 +25,7 @@ namespace RPGM.Gameplay
 
         public void OnCollisionEnter2D(Collision2D collision)
         {
+            hasInteracted = true;
             var c = GetConversation();
             if (c != null)
             {
