@@ -20,7 +20,6 @@ public class LLMManager : MonoBehaviour
     public GameObject[] npcs;
     public GameObject[] items;
 
-
     public async void AskChatGPT(string newText)
     {
         string gameState = GetGameState();
@@ -65,7 +64,8 @@ public class LLMManager : MonoBehaviour
     private string GetGameState()
     {
         string state = "Player coordinates: (" + character.transform.position.x + ", " + character.transform.position.y + ")\n";
-        
+        Dictionary<string,List<int>> itemCounts = new Dictionary<string, List<int>>();
+
         foreach (GameObject npc in npcs)
         {
             state += npc.name + " NPC coordinates: (" + npc.transform.position.x + ", " + npc.transform.position.y + ")\n";
@@ -104,12 +104,35 @@ public class LLMManager : MonoBehaviour
             {
                 state += " status: not yet found.\n";
             }
+
+            //print item counts
+            if (itemCounts.ContainsKey(item.name))
+            {
+                itemCounts[item.name][1]++;
+                if (!item.activeInHierarchy)
+                {
+                    itemCounts[item.name][0]++;
+                }
+            }
+            else
+            {
+                itemCounts[item.name] = new List<int> { 0, 1 };
+                if (!item.activeInHierarchy)
+                {
+                    itemCounts[item.name][0]++;
+                }
+            }
+        }
+        foreach (var key in itemCounts.Keys)
+        {
+            state += itemCounts[key][0] + key + " found out of " + itemCounts[key][1] + key + " total.\n";
         }
         return state;
     }
 
     public void PrintState()
     {
+        Dictionary<string,List<int>> itemCounts = new Dictionary<string, List<int>>();
         Debug.Log("GAME STATE:");
         Debug.Log("Player coordinates: (" + character.transform.position.x + ", " + character.transform.position.y + ")");
         foreach (GameObject npc in npcs)
@@ -148,6 +171,27 @@ public class LLMManager : MonoBehaviour
             {
                 Debug.Log(" status: not yet found.\n");
             }
+        //print item counts
+            if (itemCounts.ContainsKey(item.name))
+            {
+                itemCounts[item.name][1]++;
+                if (!item.activeInHierarchy)
+                {
+                    itemCounts[item.name][0]++;
+                }
+            }
+            else
+            {
+                itemCounts[item.name] = new List<int> { 0, 1 };
+                if (!item.activeInHierarchy)
+                {
+                    itemCounts[item.name][0]++;
+                }
+            }
+        }
+        foreach (var key in itemCounts.Keys)
+        {
+            Debug.Log(itemCounts[key][0] + key + " found out of " + itemCounts[key][1] + key + " total.\n");
         }
     }
     // Start is called before the first frame update
